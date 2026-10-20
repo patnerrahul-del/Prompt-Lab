@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0A0A0B;
+    --surface: #121214;
+    --elevated: #1A1A1D;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-gold: rgba(201, 162, 75, 0.2);
+    --text-ivory: #F5F1E8;
+    --text-muted: #9A968C;
+    --gold: #C9A24B;
+    --gold-light: #E8D8A8;
+    --gold-dark: #8A6A22;
+  }
+
+  .light {
+    --background: #F9F7F1;
+    --surface: #FFFFFF;
+    --elevated: #F2EFE9;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-gold: rgba(201, 162, 75, 0.35);
+    --text-ivory: #151515;
+    --text-muted: #6B685F;
+    --gold: #B3862A;
+    --gold-light: #D4BA6A;
+    --gold-dark: #705214;
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text-ivory);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Custom Luxury Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0A0A0B;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2A2A2E;
+    border-radius: 9999px;
+    border: 1px solid rgba(201, 162, 75, 0.15);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C9A24B;
+  }
+}
+
+/* Glassmorphism Luxury Utilities */
+.glass-panel {
+  background: rgba(18, 18, 20, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(26, 26, 29, 0.6) 0%, rgba(18, 18, 20, 0.4) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(201, 162, 75, 0.4);
+  box-shadow: 0 8px 32px -8px rgba(201, 162, 75, 0.15);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #E8D8A8 0%, #C9A24B 50%, #8A6A22 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-hairline-b {
+  border-bottom: 1px solid rgba(201, 162, 75, 0.2);
+}
+
+.gold-hairline-t {
+  border-top: 1px solid rgba(201, 162, 75, 0.2);
+}
+
+/* Subtle Film Grain Texture Overlay */
+.film-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}

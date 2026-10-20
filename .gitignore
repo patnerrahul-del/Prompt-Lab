@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+dist-ssr
+*.local
+build
+
+# Environment variables (NEVER COMMIT SECRETS)
+.env
+.env.production
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+
+# Supabase local generated / temporary
+.supabase
+supabase/.branches
+supabase/.temp
+
+# Proxy cache
+.npm_proxy_cache/
+local_npm_proxy.py
+
+# Vitest / Coverage
+coverage/
