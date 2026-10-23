@@ -27,11 +27,19 @@ import {
   BarChart3,
   Gift,
   Key,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Menu,
+  X,
+  ArrowLeft,
+  ShieldCheck,
+  ChevronRight,
+  Radio,
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { formatINR, formatDate, extractVariables } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 import { useMarketplace } from '@/hooks/use-marketplace';
@@ -102,6 +110,27 @@ export function AdminDashboard() {
 
   // Active ERP/CRM Navigation Tab
   const [activeTab, setActiveTab] = useState<'overview' | 'studio' | 'customers' | 'sellers' | 'orders' | 'coupons' | 'tickets' | 'security' | 'settings'>('overview');
+
+  // Collapsible Sidebar & Mobile Drawer State
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('aurum_admin_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [sidebarFilter, setSidebarFilter] = useState('');
+
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('aurum_admin_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Security Audit & Intrusion Detection State
   const [securityLogs, setSecurityLogs] = useState<SecurityIncident[]>(() => getSecurityIncidents());
@@ -431,149 +460,472 @@ export function AdminDashboard() {
       c.email.toLowerCase().includes(customerSearch.toLowerCase())
   );
 
+  const navGroups = [
+    {
+      group: 'Core Financials',
+      items: [
+        { id: 'overview' as const, label: 'ERP Financial Ledger', short: 'Ledger', icon: BarChart3, desc: 'Balance sheet, GMV, and net revenue' },
+        { id: 'orders' as const, label: 'Order Transactions', short: 'Orders', icon: ShoppingCart, badge: orders.length, desc: 'Real-time sales & receipts' },
+      ],
+    },
+    {
+      group: 'Catalog & Studio',
+      items: [
+        { id: 'studio' as const, label: 'Prompt Studio & SKUs', short: 'Studio', icon: Sparkles, isHighlight: true, desc: 'Post new text, image & video prompts' },
+      ],
+    },
+    {
+      group: 'CRM & Network',
+      items: [
+        { id: 'customers' as const, label: 'CRM Collectors', short: 'Collectors', icon: Users, badge: customers.length, desc: 'VIP profiles, lifetime value, and status' },
+        { id: 'sellers' as const, label: 'Creator Disbursements', short: 'Sellers', icon: Building2, badge: sellers.length, desc: 'Partner commission payouts & UPI' },
+      ],
+    },
+    {
+      group: 'Growth & Support',
+      items: [
+        { id: 'coupons' as const, label: 'Promotional Vouchers', short: 'Vouchers', icon: Gift, badge: coupons.length, desc: 'Discount campaigns & coupon codes' },
+        { id: 'tickets' as const, label: 'Concierge Helpdesk', short: 'Support', icon: MessageSquare, badge: tickets.filter(t => t.status === 'open').length, badgeColor: 'bg-gold/20 text-gold-light border-gold/40', desc: 'Customer service resolution center' },
+      ],
+    },
+    {
+      group: 'Defense & Governance',
+      items: [
+        { id: 'security' as const, label: 'Cyber Shield & IDS', short: 'Security', icon: Shield, badge: securityLogs.length, badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-500/40', desc: 'Real-time intrusion detection and logs' },
+        { id: 'settings' as const, label: 'Platform Governance', short: 'Settings', icon: Sliders, desc: 'Global commission rules & OAuth' },
+      ],
+    },
+  ];
+
+  const currentTabMeta = {
+    overview: { title: 'ERP Financial Ledger', desc: 'Gross merchandise volume, retained platform revenue, and fiscal balance sheets' },
+    studio: { title: 'Master Prompt Studio', desc: 'Author and distribute verified text, image, and generative video prompts' },
+    customers: { title: 'CRM Collector Directory', desc: 'VIP customer accounts, lifetime value, and order history' },
+    sellers: { title: 'Creator Partner Disbursements', desc: 'Creator network revenue shares, UPI payouts, and approvals' },
+    orders: { title: 'Live Order Ledger', desc: 'Real-time Razorpay payments, customer receipts, and SKU delivery' },
+    coupons: { title: 'Promotional Voucher Engine', desc: 'Campaign discount codes, redemptions, and margin governance' },
+    tickets: { title: 'Concierge Helpdesk', desc: 'Customer support inquiries, SLA resolutions, and order disputes' },
+    security: { title: 'Cyber Shield & IDS Defense', desc: 'Cryptographic HMAC protection, anti-leak RLS, and attack mitigation' },
+    settings: { title: 'Platform Governance & Cloud', desc: 'Global commission rules, maintenance mode, and OAuth credentials' },
+  }[activeTab];
+
   return (
-    <div className="min-h-screen bg-background text-text-ivory py-8 px-4 sm:px-6 lg:px-8 selection:bg-gold/30">
+    <div className="min-h-screen bg-[#070709] text-text-ivory flex selection:bg-gold/30 font-sans">
       <SEO
         title="Aurum Enterprise ERP & CRM Command Center"
         description="Comprehensive enterprise resource planning, financial ledger, CRM collector directory, and prompt asset studio."
       />
 
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* ========================================================================= */}
-        {/* ENTERPRISE ERP SUITE HEADER */}
-        {/* ========================================================================= */}
-        <div className="glass-card rounded-3xl border border-white/10 p-6 sm:p-8 bg-surface/90 relative overflow-hidden shadow-luxury">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 blur-[130px] pointer-events-none rounded-full" />
+      {/* MOBILE OVERLAY BACKDROP */}
+      {isMobileOpen && (
+        <div
+          onClick={() => setIsMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm lg:hidden transition-opacity duration-300"
+        />
+      )}
 
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs font-mono uppercase tracking-widest text-gold-light font-semibold">
-                  Aurum Enterprise ERP & CRM v2.4 • Live Operations
+      {/* ========================================================================= */}
+      {/* ENTERPRISE COLLAPSIBLE SIDEBAR */}
+      {/* ========================================================================= */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0b0c10]/95 backdrop-blur-2xl border-r border-white/10 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        } ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-72'} w-72`}
+      >
+        {/* SIDEBAR HEADER / BRAND */}
+        <div className="h-16 px-4 border-b border-white/10 flex items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-gold via-champagne to-gold-dark p-0.5 shadow-gold-sm shrink-0 flex items-center justify-center">
+              <div className="h-full w-full bg-black/90 rounded-[10px] flex items-center justify-center">
+                <Sparkles className="h-4 w-4 text-gold" />
+              </div>
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-serif text-sm font-bold tracking-widest text-text-ivory uppercase truncate">
+                    Aurum ERP
+                  </span>
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-gold/20 text-gold-light border border-gold/30">
+                    PRO
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono text-text-muted truncate">
+                  Executive Suite v2.4
                 </span>
               </div>
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-text-ivory">
-                Executive Command Center
-              </h1>
-              <p className="text-sm text-text-muted max-w-2xl font-light">
-                Comprehensive financial accounting, catalog SKU inventory, customer relationship lifecycle,
-                and Razorpay automated merchant settlement.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                variant="gold"
-                size="sm"
-                onClick={() => setActiveTab('studio')}
-                className="gap-2 shadow-gold-sm text-xs font-semibold"
-              >
-                <PlusCircle className="h-4 w-4" />
-                <span>+ Post New Prompt</span>
-              </Button>
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={() => success('Financial Books exported as CSV')}
-                className="gap-2 text-xs"
-              >
-                <Download className="h-4 w-4 text-gold" />
-                <span>Export Books (CSV)</span>
-              </Button>
-            </div>
+            )}
           </div>
 
-          {/* Quick Metrics KPI Bar */}
-          <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
-                <DollarSign className="h-3.5 w-3.5 text-gold" />
-                <span>Total GMV Volume</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-gold-light">
-                {formatINR(1840000)}
-              </div>
-              <span className="text-[11px] font-mono text-emerald-400">↑ 24.8% vs last month</span>
-            </div>
+          {/* Mobile close button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsMobileOpen(false)}
+            className="lg:hidden h-8 w-8 p-0 text-text-muted hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </Button>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
-                <Wallet className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Platform Net Revenue</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-text-ivory">
-                {formatINR(276000)}
-              </div>
-              <span className="text-[11px] font-mono text-text-muted">15% Standard Retained</span>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
-                <Users className="h-3.5 w-3.5 text-indigo-400" />
-                <span>Active CRM Collectors</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-text-ivory">
-                {customers.length + 1416}
-              </div>
-              <span className="text-[11px] font-mono text-emerald-400">↑ 62 New this week</span>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
-                <Layers className="h-3.5 w-3.5 text-champagne" />
-                <span>Total Catalog Prompts</span>
-              </div>
-              <div className="text-2xl sm:text-3xl font-serif font-bold text-text-ivory">
-                {allPrompts.length}
-              </div>
-              <span className="text-[11px] font-mono text-text-muted">Zero-leak protected</span>
-            </div>
-          </div>
+          {/* Desktop collapse toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="hidden lg:flex h-8 w-8 p-0 text-text-muted hover:text-gold hover:bg-gold/10 rounded-lg"
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </Button>
         </div>
 
-        {/* ========================================================================= */}
-        {/* ENTERPRISE MODULE NAVIGATION TABS */}
-        {/* ========================================================================= */}
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 w-full h-auto p-1.5 bg-surface/90 border border-white/10 gap-1 rounded-2xl">
-            <TabsTrigger value="overview" className="gap-1.5 py-2.5 text-xs">
-              <BarChart3 className="h-3.5 w-3.5" />
-              <span>ERP Ledger</span>
-            </TabsTrigger>
-            <TabsTrigger value="studio" className="gap-1.5 py-2.5 text-xs">
-              <Sparkles className="h-3.5 w-3.5 text-gold" />
-              <span>Prompt Studio</span>
-            </TabsTrigger>
-            <TabsTrigger value="customers" className="gap-1.5 py-2.5 text-xs">
-              <Users className="h-3.5 w-3.5" />
-              <span>CRM Customers</span>
-            </TabsTrigger>
-            <TabsTrigger value="sellers" className="gap-1.5 py-2.5 text-xs">
-              <Building2 className="h-3.5 w-3.5" />
-              <span>Sellers ({sellers.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="gap-1.5 py-2.5 text-xs">
-              <ShoppingCart className="h-3.5 w-3.5" />
-              <span>Orders ({orders.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="coupons" className="gap-1.5 py-2.5 text-xs">
-              <Gift className="h-3.5 w-3.5" />
-              <span>Vouchers</span>
-            </TabsTrigger>
-            <TabsTrigger value="tickets" className="gap-1.5 py-2.5 text-xs">
-              <MessageSquare className="h-3.5 w-3.5" />
-              <span>Support ({tickets.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="gap-1.5 py-2.5 text-xs text-red-300 hover:text-red-200">
-              <Shield className="h-3.5 w-3.5 text-red-400" />
-              <span>Cyber Shield ({securityLogs.length})</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="gap-1.5 py-2.5 text-xs">
-              <Sliders className="h-3.5 w-3.5" />
-              <span>Governance</span>
-            </TabsTrigger>
-          </TabsList>
+        {/* SIDEBAR QUICK SEARCH FILTER (WHEN EXPANDED) */}
+        {!isSidebarCollapsed && (
+          <div className="p-3 border-b border-white/5 shrink-0">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
+              <input
+                type="text"
+                value={sidebarFilter}
+                onChange={(e) => setSidebarFilter(e.target.value)}
+                placeholder="Filter ERP modules..."
+                className="w-full bg-black/40 border border-white/10 rounded-xl pl-8 pr-3 py-1.5 text-xs text-text-ivory placeholder:text-text-muted/60 focus:outline-none focus:border-gold/50 transition-all font-mono"
+              />
+              {sidebarFilter && (
+                <button
+                  onClick={() => setSidebarFilter('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-white"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* NAVIGATION ITEMS LIST */}
+        <div className="flex-1 overflow-y-auto px-2.5 py-4 space-y-5 custom-scrollbar">
+          {navGroups.map((grp) => {
+            const filteredItems = grp.items.filter(
+              (item) =>
+                !sidebarFilter ||
+                item.label.toLowerCase().includes(sidebarFilter.toLowerCase()) ||
+                item.desc.toLowerCase().includes(sidebarFilter.toLowerCase())
+            );
+            if (filteredItems.length === 0) return null;
+
+            return (
+              <div key={grp.group} className="space-y-1">
+                {!isSidebarCollapsed && (
+                  <div className="px-2.5 pb-1 text-[10px] font-mono uppercase tracking-wider text-text-muted/60 font-semibold">
+                    {grp.group}
+                  </div>
+                )}
+                {filteredItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setIsMobileOpen(false);
+                      }}
+                      title={isSidebarCollapsed ? item.label : undefined}
+                      className={`w-full group relative flex items-center rounded-xl transition-all duration-200 ${
+                        isSidebarCollapsed
+                          ? 'justify-center h-11'
+                          : 'gap-3 px-3 py-2 text-left'
+                      } ${
+                        isActive
+                          ? 'bg-gradient-to-r from-gold/25 via-gold/15 to-transparent border border-gold/40 text-gold-light font-semibold shadow-gold-sm'
+                          : 'text-text-muted hover:text-text-ivory hover:bg-white/5 border border-transparent'
+                      }`}
+                    >
+                      {/* Active indicator bar */}
+                      {isActive && (
+                        <span className="absolute left-0 top-2 bottom-2 w-1 bg-gold rounded-r-full shadow-gold-sm" />
+                      )}
+
+                      <Icon
+                        className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                          isActive
+                            ? 'text-gold'
+                            : item.isHighlight
+                            ? 'text-champagne'
+                            : 'text-text-muted group-hover:text-gold-light'
+                        } ${isSidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'}`}
+                      />
+
+                      {!isSidebarCollapsed && (
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs truncate font-medium">
+                              {item.label}
+                            </span>
+                            {item.badge !== undefined && item.badge > 0 && (
+                              <span
+                                className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full border ${
+                                  item.badgeColor ||
+                                  'bg-white/10 text-text-muted border-white/20'
+                                }`}
+                              >
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-text-muted/70 truncate font-light">
+                            {item.desc}
+                          </p>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* SIDEBAR FOOTER */}
+        <div className="p-3 border-t border-white/10 space-y-2 shrink-0 bg-black/40">
+          {/* Link to public store */}
+          <Link
+            to="/"
+            title="Visit public storefront"
+            className={`flex items-center rounded-xl border border-white/10 hover:border-gold/40 hover:bg-gold/5 text-text-muted hover:text-gold-light transition-all text-xs font-mono ${
+              isSidebarCollapsed
+                ? 'justify-center h-10 w-full'
+                : 'gap-2.5 px-3 py-2 w-full'
+            }`}
+          >
+            <ArrowLeft className="h-3.5 w-3.5 text-gold" />
+            {!isSidebarCollapsed && <span>Public Storefront</span>}
+          </Link>
+
+          {/* System status pill */}
+          {!isSidebarCollapsed && (
+            <div className="px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[10px] font-mono text-emerald-300 font-semibold uppercase">
+                  Razorpay & Supabase
+                </span>
+              </div>
+              <span className="text-[9px] font-mono text-emerald-400 font-bold">LIVE</span>
+            </div>
+          )}
+
+          {/* Admin User Card */}
+          <div
+            className={`flex items-center rounded-xl p-2 bg-surface/80 border border-white/5 ${
+              isSidebarCollapsed ? 'justify-center' : 'gap-2.5'
+            }`}
+          >
+            <div className="h-7 w-7 rounded-lg bg-gold/20 border border-gold/40 flex items-center justify-center font-serif text-xs font-bold text-gold shrink-0">
+              RC
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-medium text-text-ivory truncate">
+                  Rahul Chandrabanshi
+                </span>
+                <span className="text-[10px] font-mono text-gold-light truncate">
+                  Super Administrator
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* MAIN VIEWPORT & EXECUTIVE CONTENT */}
+      {/* ========================================================================= */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+        {/* EXECUTIVE STICKY TOPBAR */}
+        <header className="sticky top-0 z-30 h-16 bg-[#0b0c10]/90 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          {/* Left: Mobile trigger & Breadcrumbs */}
+          <div className="flex items-center gap-3 min-w-0">
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => setIsMobileOpen(true)}
+              className="lg:hidden h-9 w-9 p-0 text-text-ivory"
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={toggleSidebar}
+              className="hidden lg:flex h-9 w-9 p-0 text-text-muted hover:text-gold"
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            </Button>
+
+            <div className="flex items-center gap-2 text-xs font-mono text-text-muted min-w-0">
+              <span className="hidden sm:inline text-gold font-bold">AURUM ERP</span>
+              <ChevronRight className="h-3.5 w-3.5 text-text-muted/60 shrink-0" />
+              <span className="text-text-ivory font-semibold truncate font-serif text-sm">
+                {currentTabMeta.title}
+              </span>
+            </div>
+          </div>
+
+          {/* Right: Quick Actions */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Cyber Shield Status Pill */}
+            <button
+              onClick={() => setActiveTab('security')}
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono hover:bg-emerald-500/20 transition-all"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Shield: Armed</span>
+              {securityLogs.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 text-[10px]">
+                  {securityLogs.length} events
+                </span>
+              )}
+            </button>
+
+            {/* Quick Post Prompt Shortcut */}
+            <Button
+              variant="gold"
+              size="sm"
+              onClick={() => setActiveTab('studio')}
+              className="gap-1.5 shadow-gold-sm text-xs font-semibold h-9"
+            >
+              <PlusCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">+ Post Prompt</span>
+              <span className="sm:hidden">+ Post</span>
+            </Button>
+
+            {/* Export CSV */}
+            <Button
+              variant="glass"
+              size="sm"
+              onClick={() => success('Consolidated financial books exported as CSV')}
+              className="hidden sm:flex gap-1.5 text-xs h-9"
+            >
+              <Download className="h-3.5 w-3.5 text-gold" />
+              <span>Export CSV</span>
+            </Button>
+          </div>
+        </header>
+
+        {/* MAIN BODY AREA */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto max-w-[1600px] w-full mx-auto">
+          {/* Executive Overview Header Card */}
+          <div className="glass-card rounded-3xl border border-white/10 p-6 sm:p-8 bg-surface/90 relative overflow-hidden shadow-luxury">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gold/10 blur-[130px] pointer-events-none rounded-full" />
+
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-mono uppercase tracking-widest text-gold-light font-semibold">
+                    Aurum Enterprise ERP & CRM Command Center
+                  </span>
+                </div>
+                <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-text-ivory">
+                  {currentTabMeta.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-text-muted max-w-2xl font-light">
+                  {currentTabMeta.desc}
+                </p>
+              </div>
+
+              {/* Quick status pill */}
+              <div className="flex items-center gap-2 bg-black/40 border border-white/10 px-3 py-2 rounded-2xl shrink-0 font-mono text-xs">
+                <Radio className="h-3.5 w-3.5 text-gold animate-pulse" />
+                <span className="text-text-muted">Live Active Engines:</span>
+                <span className="text-gold font-bold">9 Master Modules</span>
+              </div>
+            </div>
+
+            {/* Quick Metrics KPI Bar */}
+            <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
+                  <DollarSign className="h-3.5 w-3.5 text-gold" />
+                  <span>Total GMV Volume</span>
+                </div>
+                <div className="text-xl sm:text-2xl font-serif font-bold text-gold-light">
+                  {formatINR(1840000)}
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400">↑ 24.8% vs last month</span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
+                  <Wallet className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Platform Net Revenue</span>
+                </div>
+                <div className="text-xl sm:text-2xl font-serif font-bold text-text-ivory">
+                  {formatINR(276000)}
+                </div>
+                <span className="text-[10px] font-mono text-text-muted">15% Standard Retained</span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
+                  <Users className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>Active CRM Collectors</span>
+                </div>
+                <div className="text-xl sm:text-2xl font-serif font-bold text-text-ivory">
+                  {customers.length + 1416}
+                </div>
+                <span className="text-[10px] font-mono text-emerald-400">↑ 62 New this week</span>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-text-muted uppercase">
+                  <Layers className="h-3.5 w-3.5 text-champagne" />
+                  <span>Total Catalog Prompts</span>
+                </div>
+                <div className="text-xl sm:text-2xl font-serif font-bold text-text-ivory">
+                  {allPrompts.length}
+                </div>
+                <span className="text-[10px] font-mono text-text-muted">Zero-leak protected</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick horizontal switch pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+            {navGroups.flatMap(g => g.items).map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all border ${
+                    isActive
+                      ? 'bg-gold/20 text-gold-light border-gold/40 shadow-gold-sm font-semibold'
+                      : 'bg-surface/60 text-text-muted hover:text-text-ivory hover:bg-white/5 border-white/5'
+                  }`}
+                >
+                  <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-gold' : 'text-text-muted'}`} />
+                  <span>{item.short}</span>
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span className="text-[9px] px-1 rounded-full bg-white/10 text-text-muted">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* ENTERPRISE MODULE NAVIGATION TABS */}
+          {/* ========================================================================= */}
+          <Tabs defaultValue="overview" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
 
           {/* ========================================================================= */}
           {/* TAB 1: FINANCIAL BI & ERP REVENUE LEDGER */}
@@ -1737,6 +2089,7 @@ export function AdminDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+        </main>
       </div>
     </div>
   );

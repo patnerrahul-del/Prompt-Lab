@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from '@/components/common/navbar';
 import { Footer } from '@/components/common/footer';
 import { AuthModal } from '@/components/common/auth-modal';
@@ -30,10 +30,12 @@ import { NotFound } from '@/pages/not-found';
 function AppContent(): React.ReactElement {
   // Initialize Lenis smooth scroll
   useLenis();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen bg-background text-text-ivory flex flex-col selection:bg-gold/30 selection:text-gold-light film-grain">
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
 
       <main className="flex-1">
         <Routes>
@@ -125,7 +127,7 @@ function AppContent(): React.ReactElement {
         </Routes>
       </main>
 
-      <Footer />
+      {!isAdminRoute && <Footer />}
       <AuthModal />
       <CommandPalette />
     </div>
