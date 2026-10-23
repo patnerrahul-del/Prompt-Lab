@@ -12,6 +12,9 @@ interface AuthContextType {
   isAdmin: boolean;
   isSeller: boolean;
   isUser: boolean;
+  isSubscribed: boolean;
+  toggleSubscription: () => void;
+  setSubscription: (active: boolean) => void;
   isAuthModalOpen: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
@@ -50,6 +53,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [simulatedRole, setSimulatedRole] = useState<UserRole | null>(() => {
     return (localStorage.getItem('aurum_simulated_role') as UserRole) || null;
   });
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(() => {
+    return localStorage.getItem('aurum_vip_subscription') === 'true';
+  });
+
+  const toggleSubscription = () => {
+    setIsSubscribed((prev) => {
+      const next = !prev;
+      localStorage.setItem('aurum_vip_subscription', String(next));
+      return next;
+    });
+  };
+
+  const setSubscription = (active: boolean) => {
+    setIsSubscribed(active);
+    localStorage.setItem('aurum_vip_subscription', String(active));
+  };
 
   const setRole = (newRole: UserRole) => {
     setSimulatedRole(newRole);
@@ -238,6 +257,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     isSeller,
     isUser,
+    isSubscribed,
+    toggleSubscription,
+    setSubscription,
     isAuthModalOpen,
     openAuthModal: () => setIsAuthModalOpen(true),
     closeAuthModal: () => setIsAuthModalOpen(false),

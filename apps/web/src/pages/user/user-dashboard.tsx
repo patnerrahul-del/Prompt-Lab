@@ -25,7 +25,7 @@ import { SEO } from '@/components/common/seo';
 import type { UserRole } from '@/types/database.types';
 
 export function UserDashboard() {
-  const { user, profile, role, setRole, isAdmin, signOut } = useAuth();
+  const { user, profile, role, setRole, isAdmin, signOut, isSubscribed, toggleSubscription } = useAuth();
   const { allPrompts, orders } = useMarketplace();
   const { prompts: vaultPrompts } = useVault();
   const { success } = useToast();
@@ -47,8 +47,10 @@ export function UserDashboard() {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  // Purchased or complimentary unlocked prompts
-  const unlockedPrompts = allPrompts.filter((p) => p.price_inr === 0 || p.has_purchased);
+  // Purchased or complimentary unlocked prompts (or ALL prompts if user holds VIP Subscription!)
+  const unlockedPrompts = isSubscribed
+    ? allPrompts
+    : allPrompts.filter((p) => p.price_inr === 0 || p.has_purchased);
 
   return (
     <div className="min-h-screen bg-background text-text-ivory py-10 px-4 sm:px-6 lg:px-8">
@@ -187,6 +189,37 @@ export function UserDashboard() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* VIP All-Access Subscription Card */}
+          <div className="mt-5 p-4 rounded-2xl bg-black/40 border border-gold/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-gold" />
+                <span className="font-serif font-bold text-sm text-text-ivory">
+                  Aurum VIP All-Access Membership Pass
+                </span>
+                <Badge variant={isSubscribed ? 'gold' : 'outline'} className="text-[10px] font-mono uppercase">
+                  {isSubscribed ? '👑 ACTIVE SUBSCRIBER' : 'FREE TIER'}
+                </Badge>
+              </div>
+              <p className="text-xs text-text-muted">
+                {isSubscribed
+                  ? 'All paid Image & Video prompts unlocked. 1-click copy, .TXT export, and .PDF dossier download enabled.'
+                  : 'Activate VIP Membership to instantly unlock all paid prompts with 1-click copy, .TXT download, and .PDF export.'}
+              </p>
+            </div>
+            <Button
+              variant={isSubscribed ? 'glass' : 'gold'}
+              size="sm"
+              onClick={() => {
+                toggleSubscription();
+                success(isSubscribed ? 'VIP Subscription paused' : '🎉 VIP All-Access Subscription Activated! All paid prompts unlocked.');
+              }}
+              className="text-xs font-semibold whitespace-nowrap"
+            >
+              {isSubscribed ? 'Pause VIP' : '👑 Activate VIP Pass'}
+            </Button>
           </div>
         </div>
 

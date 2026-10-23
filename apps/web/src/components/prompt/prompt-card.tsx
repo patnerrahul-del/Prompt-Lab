@@ -6,6 +6,7 @@ import { PriceTag } from '@/components/ui/price-tag';
 import { RatingStars } from '@/components/ui/rating-stars';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
+import { useAuth } from '@/hooks/use-auth';
 import type { Prompt } from '@/types/database.types';
 
 export interface PromptCardProps {
@@ -19,6 +20,7 @@ export function PromptCard({
   onFavoriteToggle,
   isFavorited = false,
 }: PromptCardProps) {
+  const { isSubscribed } = useAuth();
   const [copied, setCopied] = useState(false);
   const { success } = useToast();
 
@@ -126,11 +128,18 @@ export function PromptCard({
 
         {/* Bottom Pricing & Action */}
         <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-          <PriceTag
-            priceInr={prompt.price_inr}
-            compareAtPriceInr={prompt.compare_at_price_inr}
-            size="sm"
-          />
+          <div className="flex items-center gap-2">
+            <PriceTag
+              priceInr={prompt.price_inr}
+              compareAtPriceInr={prompt.compare_at_price_inr}
+              size="sm"
+            />
+            {isSubscribed && prompt.price_inr > 0 && (
+              <span className="rounded-md bg-gold/15 border border-gold/30 px-1.5 py-0.5 text-[9px] font-mono text-gold-light uppercase font-bold">
+                VIP Pass
+              </span>
+            )}
+          </div>
 
           <Link
             to={`/prompt/${prompt.slug}`}

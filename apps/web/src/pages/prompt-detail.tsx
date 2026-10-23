@@ -11,6 +11,7 @@ import { ReviewList } from '@/components/marketplace/review-list';
 import { PromptCard } from '@/components/prompt/prompt-card';
 import { SEO } from '@/components/common/seo';
 import { useMarketplace } from '@/hooks/use-marketplace';
+import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/components/ui/toast';
 import type { Review } from '@/types/database.types';
 
@@ -18,6 +19,7 @@ export function PromptDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { allPrompts, favorites, toggleFavorite } = useMarketplace();
+  const { isSubscribed } = useAuth();
   const { success } = useToast();
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -248,8 +250,30 @@ export function PromptDetail() {
           </div>
         </div>
 
+        {/* VIP All-Access Subscription Clearance Indicator */}
+        {isSubscribed && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gold/10 border border-gold/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-gold-sm">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/20 text-gold border border-gold/40 shadow-gold-sm">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="font-serif font-bold text-text-ivory text-base">
+                  Aurum VIP All-Access Pass Active
+                </h4>
+                <p className="text-xs text-text-muted">
+                  All paid prompts are 100% unlocked for your account. One-click copy, .TXT export, and .PDF dossier download are active below.
+                </p>
+              </div>
+            </div>
+            <Badge variant="gold" className="text-xs font-mono uppercase whitespace-nowrap self-start sm:self-auto">
+              👑 VIP Unlocked
+            </Badge>
+          </div>
+        )}
+
         {/* Locked Content Shield / Decryption Engine */}
-        <section className="pt-6">
+        <section className="pt-2">
           <LockedContentShield
             prompt={prompt}
             onInitiateCheckout={() => navigate(`/checkout/${prompt.id}`)}

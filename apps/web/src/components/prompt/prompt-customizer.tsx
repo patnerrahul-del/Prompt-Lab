@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Copy, Check, Sliders, Sparkles } from 'lucide-react';
+import { Copy, Check, Sliders, Sparkles, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractVariables, interpolatePrompt } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
@@ -59,6 +59,117 @@ export function PromptCustomizer({
     setCopiedFormat(formatName);
     success(`Copied for ${formatName} with gold clearance`);
     setTimeout(() => setCopiedFormat(null), 2500);
+  };
+
+  const handleDownloadTxt = () => {
+    const content = `================================================================================
+AURUM PROMPTS — CERTIFIED MASTERWORK PROMPT ASSET
+Title: ${prompt.title}
+Target Engine: ${prompt.model?.name || (prompt.settings?.target_engine as string) || 'AI Engine'}
+Aspect Ratio: ${(prompt.settings?.aspect_ratio as string) || '16:9'}
+Difficulty: ${prompt.difficulty || 'Advanced'} | License: Commercial Royalty-Free
+Export Date: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+================================================================================
+
+[MASTER PROMPT SYNTAX]
+${customizedPrompt}
+
+${prompt.negative_prompt ? `[NEGATIVE PROMPT PARAMETERS]\n${prompt.negative_prompt}\n\n` : ''}[CERTIFIED SETTINGS & PARAMETERS]
+${Object.entries(prompt.settings || {})
+  .map(([k, v]) => `${k}: ${v}`)
+  .join('\n')}
+
+================================================================================
+(c) Aurum Prompts Vault. All Rights Reserved. Certified for Commercial Production.
+================================================================================`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${prompt.slug || 'aurum-prompt'}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    success('Downloaded prompt text dossier (.TXT)');
+  };
+
+  const handleDownloadPdf = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      handleDownloadTxt();
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${prompt.title} — Aurum Prompts Dossier</title>
+        <style>
+          @page { size: A4; margin: 15mm; }
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0A0A0B; color: #F5F5F0; padding: 25px; line-height: 1.6; }
+          .header { border-bottom: 2px solid #C9A24B; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+          .brand { font-size: 24px; font-weight: bold; color: #C9A24B; letter-spacing: 2px; }
+          .badge { background: #1C1C20; border: 1px solid #C9A24B; color: #E8D8A8; font-size: 11px; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; font-family: monospace; }
+          h1 { font-size: 22px; color: #FFF; margin: 10px 0 5px 0; }
+          .meta { font-size: 12px; color: #888; font-family: monospace; margin-bottom: 20px; }
+          .box { background: #141416; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+          .box-title { font-size: 11px; text-transform: uppercase; color: #C9A24B; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; font-family: monospace; }
+          .prompt-text { font-family: "Courier New", monospace; font-size: 13px; color: #FFF; white-space: pre-wrap; line-height: 1.5; }
+          .settings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 12px; font-family: monospace; }
+          .setting-item { background: #1D1D20; padding: 8px; border-radius: 4px; border: 1px solid #2A2A30; }
+          .footer { margin-top: 35px; padding-top: 15px; border-top: 1px solid #333; font-size: 10px; color: #666; text-align: center; font-family: monospace; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="brand">AURUM PROMPTS</div>
+          <div class="badge">Certified Commercial Dossier</div>
+        </div>
+        <h1>${prompt.title}</h1>
+        <div class="meta">Asset Slug: ${prompt.slug} • Target Engine: ${prompt.model?.name || (prompt.settings?.target_engine as string) || 'AI Engine'} • License: Commercial Royalty-Free</div>
+
+        <div class="box">
+          <div class="box-title">Master Synthesized Prompt</div>
+          <div class="prompt-text">${customizedPrompt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        </div>
+
+        ${prompt.negative_prompt ? `
+        <div class="box">
+          <div class="box-title">Negative Prompt Parameters</div>
+          <div class="prompt-text">${prompt.negative_prompt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+        </div>` : ''}
+
+        <div class="box">
+          <div class="box-title">Certified Production Settings</div>
+          <div class="settings-grid">
+            <div class="setting-item"><strong>Aspect Ratio:</strong> ${(prompt.settings?.aspect_ratio as string) || '16:9'}</div>
+            <div class="setting-item"><strong>Difficulty:</strong> ${prompt.difficulty || 'Advanced'}</div>
+            <div class="setting-item"><strong>Target AI Engine:</strong> ${prompt.model?.name || (prompt.settings?.target_engine as string) || 'Midjourney / FLUX / Sora'}</div>
+            <div class="setting-item"><strong>Entitlement Status:</strong> Verified Commercial Entitlement Pass</div>
+          </div>
+        </div>
+
+        <div class="footer">
+          This certified dossier constitutes proof of legal commercial entitlement under the Aurum Prompts Master License.<br/>
+          (c) ${new Date().getFullYear()} Aurum Prompts Vault. All Rights Reserved.
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    success('Generated printable PDF dossier (Press Save as PDF in print dialog)');
   };
 
   return (
@@ -206,6 +317,33 @@ export function PromptCustomizer({
                   <span>Copy Negative</span>
                 </Button>
               )}
+            </div>
+
+            {/* 1-Click Copy and File Download Actions (.TXT and .PDF) */}
+            <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-gold-light">
+                Instant Export Dossier:
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="glass"
+                  size="sm"
+                  onClick={handleDownloadTxt}
+                  className="gap-1.5 text-xs border-white/20 hover:border-gold"
+                >
+                  <Download className="h-3.5 w-3.5 text-gold" />
+                  <span>Download .TXT</span>
+                </Button>
+                <Button
+                  variant="gold"
+                  size="sm"
+                  onClick={handleDownloadPdf}
+                  className="gap-1.5 text-xs shadow-gold-sm font-semibold"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  <span>Download .PDF Dossier</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -16,16 +16,16 @@ export function LockedContentShield({
   prompt,
   onInitiateCheckout,
 }: LockedContentShieldProps) {
-  const { user, isUser, openAuthModal, isAdmin } = useAuth();
+  const { user, isUser, openAuthModal, isAdmin, isSubscribed } = useAuth();
 
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [unlockedPayload, setUnlockedPayload] = useState<string | null>(null);
 
-  // Check if owner or admin
+  // Check if owner, admin, purchased, complimentary ₹0, or VIP All-Access Subscriber
   const isOwnerOrAdmin = Boolean(
     (user && prompt.user_id === user.id) || isAdmin
   );
-  const hasEntitlement = isOwnerOrAdmin || prompt.has_purchased || prompt.price_inr === 0;
+  const hasEntitlement = isOwnerOrAdmin || prompt.has_purchased || prompt.price_inr === 0 || isSubscribed;
 
   // Invoke secure anti-leak RPC to decrypt prompt text
   const handleDecryptContent = async () => {
@@ -94,10 +94,12 @@ export function LockedContentShield({
           <ShieldCheck className="h-7 w-7" />
         </div>
         <h3 className="font-serif text-2xl font-bold text-text-ivory mb-2">
-          Entitlement Verified
+          {isSubscribed ? 'VIP All-Access Unlocked' : 'Entitlement Verified'}
         </h3>
         <p className="text-sm text-text-muted mb-6 max-w-md mx-auto">
-          {prompt.price_inr === 0
+          {isSubscribed
+            ? 'Unlocked via your active Aurum VIP All-Access Subscription. Full commercial production clearance granted.'
+            : prompt.price_inr === 0
             ? 'This is a complimentary curated asset available to all authenticated collectors.'
             : 'You possess verified commercial entitlement to this prompt.'}
         </p>
