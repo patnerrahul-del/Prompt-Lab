@@ -514,7 +514,7 @@ export function AdminDashboard() {
         {/* ========================================================================= */}
         {/* ENTERPRISE MODULE NAVIGATION TABS */}
         {/* ========================================================================= */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
           <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 w-full h-auto p-1.5 bg-surface/90 border border-white/10 gap-1 rounded-2xl">
             <TabsTrigger value="overview" className="gap-1.5 py-2.5 text-xs">
               <BarChart3 className="h-3.5 w-3.5" />

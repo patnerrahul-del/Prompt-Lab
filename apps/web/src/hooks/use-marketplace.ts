@@ -490,18 +490,20 @@ export function useMarketplace() {
 
   // Admin / Creator: Post new prompt to website
   const addMarketplacePrompt = async (
-    promptData: Partial<Prompt>,
-    fullPromptText: string,
-    mediaList: { media_type: 'IMAGE' | 'VIDEO'; url: string; thumbnail_url?: string; is_cover?: boolean }[]
+    promptData: Partial<Prompt> & { full_prompt_text?: string },
+    fullPromptText?: string,
+    mediaList?: { media_type: 'IMAGE' | 'VIDEO' | 'image' | 'video'; url: string; thumbnail_url?: string; is_cover?: boolean }[]
   ) => {
     const id = 'p_' + Math.random().toString(36).substring(2, 9);
     const slug = promptData.slug || promptData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'prompt-' + id;
-    const teaser = promptData.teaser || fullPromptText.slice(0, Math.floor(fullPromptText.length * 0.25)) + '...';
+    const text = fullPromptText || promptData.full_prompt_text || '';
+    const teaser = promptData.teaser || text.slice(0, Math.floor(text.length * 0.25)) + '...';
 
-    const media: PromptMedia[] = mediaList.map((m, idx) => ({
+    const rawMediaList = mediaList || (promptData.media as any) || [];
+    const media: PromptMedia[] = rawMediaList.map((m: any, idx: number) => ({
       id: `m_${id}_${idx}`,
       prompt_id: id,
-      media_type: m.media_type,
+      media_type: (m.media_type || 'image').toUpperCase() as any,
       url: m.url,
       thumbnail_url: m.thumbnail_url || m.url,
       display_order: idx,
@@ -586,7 +588,7 @@ export function useMarketplace() {
 
         await supabase.from('prompt_contents').insert({
           prompt_id: id,
-          full_prompt_text: fullPromptText,
+          full_prompt_text: text,
         });
 
         for (const item of media) {
@@ -607,6 +609,7 @@ export function useMarketplace() {
     const updated = [completePrompt, ...prompts];
     setPrompts(updated);
     localStorage.setItem('aurum_marketplace_prompts', JSON.stringify(updated));
+    localStorage.setItem('aurum_content_' + id, text);
     return completePrompt;
   };
 
