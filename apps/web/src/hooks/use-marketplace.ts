@@ -509,6 +509,8 @@ export function useMarketplace() {
       created_at: new Date().toISOString(),
     }));
 
+    const isVideoPrompt = Boolean(promptData.category?.type === 'VIDEO' || (promptData as any).type === 'VIDEO');
+
     const completePrompt: Prompt = {
       id,
       user_id: promptData.user_id || '00000000-0000-0000-0000-000000000001',
@@ -537,11 +539,11 @@ export function useMarketplace() {
       updated_at: new Date().toISOString(),
       category: promptData.category || {
         id: 'cat_custom',
-        name: promptData.category?.type === 'VIDEO' ? 'Generative Video' : 'Haute Image',
-        slug: promptData.category?.type === 'VIDEO' ? 'generative-video' : 'haute-image',
-        type: promptData.category?.type || 'IMAGE',
+        name: isVideoPrompt ? 'Generative Video' : 'Haute Image',
+        slug: isVideoPrompt ? 'generative-video' : 'haute-image',
+        type: isVideoPrompt ? 'VIDEO' : 'IMAGE',
         description: null,
-        icon: promptData.category?.type === 'VIDEO' ? 'Film' : 'Image',
+        icon: isVideoPrompt ? 'Film' : 'Image',
         sort_order: 1,
         created_at: new Date().toISOString(),
       },
@@ -549,7 +551,7 @@ export function useMarketplace() {
         id: 'mod_custom',
         name: 'Target AI Model',
         slug: 'target-model',
-        category: promptData.category?.type || 'IMAGE',
+        category: isVideoPrompt ? 'VIDEO' : 'IMAGE',
         copy_template: null,
         is_active: true,
         sort_order: 1,
@@ -611,7 +613,11 @@ export function useMarketplace() {
   // Delete prompt from marketplace
   const deleteMarketplacePrompt = async (promptId: string) => {
     if (isSupabaseConfigured) {
-      await supabase.from('prompts').delete().eq('id', promptId).catch(() => {});
+      try {
+        await supabase.from('prompts').delete().eq('id', promptId);
+      } catch (e) {
+        console.error('Error deleting prompt from Supabase:', e);
+      }
     }
     const updated = prompts.filter((p) => p.id !== promptId);
     setPrompts(updated);
@@ -625,7 +631,11 @@ export function useMarketplace() {
     const newFeatured = !target.is_featured;
 
     if (isSupabaseConfigured) {
-      await supabase.from('prompts').update({ is_featured: newFeatured }).eq('id', promptId).catch(() => {});
+      try {
+        await supabase.from('prompts').update({ is_featured: newFeatured }).eq('id', promptId);
+      } catch (e) {
+        console.error('Error updating prompt in Supabase:', e);
+      }
     }
 
     const updated = prompts.map((p) => (p.id === promptId ? { ...p, is_featured: newFeatured } : p));
@@ -690,6 +700,7 @@ export function useMarketplace() {
     models,
     bundles,
     orders,
+    setOrders,
     isLoading,
     favorites,
     toggleFavorite,

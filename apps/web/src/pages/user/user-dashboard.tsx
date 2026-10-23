@@ -114,7 +114,7 @@ export function UserDashboard() {
                   <h1 className="text-2xl sm:text-3xl font-serif font-bold text-text-ivory">
                     {profile?.full_name || user?.user_metadata?.full_name || 'Authenticated Collector'}
                   </h1>
-                  <Badge variant={role === 'admin' ? 'gold' : role === 'seller' ? 'secondary' : 'outline'}>
+                  <Badge variant={role === 'admin' ? 'gold' : role === 'seller' ? 'warning' : 'outline'}>
                     {role === 'admin' ? 'Master Admin' : role === 'seller' ? 'Verified Seller' : 'Collector'}
                   </Badge>
                 </div>

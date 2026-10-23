@@ -65,7 +65,7 @@ export function AdminDashboard() {
   const [newCompareAtPrice, setNewCompareAtPrice] = useState<number>(1199);
   const [isFeatured, setIsFeatured] = useState(true);
   const [newDifficulty, setNewDifficulty] = useState<PromptDifficulty>('advanced');
-  const [newLicenseType, setNewLicenseType] = useState<PromptLicenseType>('commercial');
+  const [newLicenseType] = useState<PromptLicenseType>('commercial');
 
   // Media inputs
   const [coverImageUrl, setCoverImageUrl] = useState('https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85');
