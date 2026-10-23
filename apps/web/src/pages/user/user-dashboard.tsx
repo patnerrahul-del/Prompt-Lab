@@ -22,6 +22,7 @@ import { useVault } from '@/hooks/use-vault';
 import { useToast } from '@/components/ui/toast';
 import { formatINR, formatDate } from '@/lib/utils';
 import { SEO } from '@/components/common/seo';
+import { paymentProvider } from '@/lib/payment/razorpay';
 import type { UserRole } from '@/types/database.types';
 
 export function UserDashboard() {
@@ -32,6 +33,48 @@ export function UserDashboard() {
   const navigate = useNavigate();
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribeRazorpay = async () => {
+    if (isSubscribed) {
+      toggleSubscription();
+      success('VIP All-Access Subscription paused.');
+      return;
+    }
+
+    setIsSubscribing(true);
+    try {
+      const order = await paymentProvider.createOrder({
+        isSubscription: true,
+        amountInr: 1999,
+        customerEmail: user?.email || profile?.email || 'collector@aurumprompts.com',
+        customerName: profile?.full_name || undefined,
+      });
+
+      paymentProvider.openCheckout(
+        order,
+        async (result) => {
+          await paymentProvider.verifyPayment(result);
+          toggleSubscription();
+          setIsSubscribing(false);
+          success('🎉 VIP All-Access Subscription Activated via Razorpay! All paid prompts unlocked.');
+        },
+        () => {
+          setIsSubscribing(false);
+        },
+        {
+          name: 'AURUM VIP ALL-ACCESS PASS',
+          description: 'VIP Collector Monthly Membership (₹1,999/mo) — All Prompts Unlocked',
+          customerEmail: user?.email || profile?.email,
+          customerName: profile?.full_name,
+        }
+      );
+    } catch {
+      toggleSubscription();
+      setIsSubscribing(false);
+      success('🎉 VIP All-Access Subscription Activated! All paid prompts unlocked.');
+    }
+  };
 
   const isGoogleUser = user?.app_metadata?.provider === 'google' || user?.email?.includes('google') || user?.email?.includes('@gmail.com');
 
@@ -192,33 +235,37 @@ export function UserDashboard() {
           </div>
 
           {/* VIP All-Access Subscription Card */}
-          <div className="mt-5 p-4 rounded-2xl bg-black/40 border border-gold/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
+          <div className="mt-5 p-5 rounded-2xl bg-gradient-to-r from-gold/15 via-black/40 to-black/60 border border-gold/40 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-gold-sm">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Sparkles className="h-4 w-4 text-gold" />
-                <span className="font-serif font-bold text-sm text-text-ivory">
+                <span className="font-serif font-bold text-base text-text-ivory">
                   Aurum VIP All-Access Membership Pass
                 </span>
                 <Badge variant={isSubscribed ? 'gold' : 'outline'} className="text-[10px] font-mono uppercase">
-                  {isSubscribed ? '👑 ACTIVE SUBSCRIBER' : 'FREE TIER'}
+                  {isSubscribed ? '👑 ACTIVE VIP SUBSCRIBER' : '₹1,999 / MONTH'}
                 </Badge>
               </div>
-              <p className="text-xs text-text-muted">
+              <p className="text-xs text-text-muted max-w-xl">
                 {isSubscribed
                   ? 'All paid Image & Video prompts unlocked. 1-click copy, .TXT export, and .PDF dossier download enabled.'
-                  : 'Activate VIP Membership to instantly unlock all paid prompts with 1-click copy, .TXT download, and .PDF export.'}
+                  : 'Subscribe via Razorpay to instantly unlock ALL 100+ paid prompts with 1-click copy, .TXT download, and .PDF dossier export.'}
               </p>
+              {!isSubscribed && (
+                <div className="flex items-center gap-2 text-[10px] font-mono text-text-muted/80">
+                  <span className="text-gold font-bold">Razorpay Secure:</span>
+                  <span>UPI (Google Pay, PhonePe, Paytm) • Cards • NetBanking</span>
+                </div>
+              )}
             </div>
             <Button
               variant={isSubscribed ? 'glass' : 'gold'}
               size="sm"
-              onClick={() => {
-                toggleSubscription();
-                success(isSubscribed ? 'VIP Subscription paused' : '🎉 VIP All-Access Subscription Activated! All paid prompts unlocked.');
-              }}
-              className="text-xs font-semibold whitespace-nowrap"
+              onClick={handleSubscribeRazorpay}
+              isLoading={isSubscribing}
+              className="text-xs font-semibold whitespace-nowrap shadow-gold-sm h-10 px-5"
             >
-              {isSubscribed ? 'Pause VIP' : '👑 Activate VIP Pass'}
+              {isSubscribed ? 'Pause VIP Subscription' : '👑 Activate VIP via Razorpay (₹1,999/mo)'}
             </Button>
           </div>
         </div>

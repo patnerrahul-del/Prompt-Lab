@@ -192,18 +192,33 @@ export function OrderSummary() {
 
           {/* Security & Checkout Action */}
           <div className="pt-4 space-y-4">
+            <div className="p-3.5 rounded-xl bg-black/40 border border-gold/20 space-y-2">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-text-muted">Payment Gateway:</span>
+                <span className="text-gold-light font-bold flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Razorpay Secure 256-bit
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap text-[10px] font-mono text-text-muted/90">
+                <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-text-ivory">UPI (Google Pay, PhonePe, Paytm, BHIM)</span>
+                <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-text-ivory">Cards (Visa, MasterCard, RuPay)</span>
+                <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-text-ivory">NetBanking (50+ Banks)</span>
+              </div>
+            </div>
+
             <Button
               variant="gold"
               size="lg"
               onClick={handleCheckout}
               isLoading={isProcessing}
-              className="w-full text-base py-3.5 shadow-gold-md gap-2"
+              className="w-full text-base py-3.5 shadow-gold-md gap-2 font-semibold"
             >
               <Sparkles className="h-5 w-5" />
               <span>
                 {total === 0
                   ? 'Claim Complimentary Prompt (Free)'
-                  : `Complete Secure Acquisition • ${formatINR(total)}`}
+                  : `Pay via Razorpay • ${formatINR(total)}`}
               </span>
             </Button>
 

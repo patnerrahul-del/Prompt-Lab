@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Lock, Sparkles, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PromptCustomizer } from './prompt-customizer';
@@ -158,11 +159,20 @@ export function LockedContentShield({
               onClick={onInitiateCheckout}
               className="w-full sm:w-auto gap-2 text-base px-8 font-semibold shadow-gold-md"
             >
-              <span>Unlock Full Prompt for {formatINR(prompt.price_inr)}</span>
+              <span>Unlock Full Prompt for {formatINR(prompt.price_inr)} via Razorpay</span>
             </Button>
-            <p className="text-[11px] font-mono text-text-muted uppercase tracking-wider">
-              Instant Commercial License • Lifetime Updates • Zero-Leak Guarantee
-            </p>
+            <div className="flex flex-col items-center gap-1.5">
+              <Link
+                to="/user"
+                className="text-xs font-mono text-gold-light hover:text-gold hover:underline flex items-center gap-1"
+              >
+                <Sparkles className="h-3 w-3 text-gold" />
+                <span>Or get VIP All-Access Pass (Unlock All 100+ Prompts)</span>
+              </Link>
+              <p className="text-[11px] font-mono text-text-muted uppercase tracking-wider">
+                Instant Razorpay UPI & Cards • Lifetime Updates • Zero-Leak Guarantee
+              </p>
+            </div>
           </div>
         )}
       </div>

@@ -4,6 +4,16 @@ export interface CreateOrderParams {
   couponCode?: string;
   customerEmail: string;
   customerName?: string;
+  isSubscription?: boolean;
+  amountInr?: number;
+}
+
+export interface CheckoutCustomOptions {
+  name?: string;
+  description?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerContact?: string;
 }
 
 export interface OrderResult {
@@ -25,7 +35,8 @@ export interface PaymentProvider {
   openCheckout(
     order: OrderResult,
     onSuccess: (result: PaymentSuccessCallback) => void,
-    onDismiss?: () => void
+    onDismiss?: () => void,
+    customOptions?: CheckoutCustomOptions
   ): void;
   verifyPayment(payload: PaymentSuccessCallback): Promise<{ success: boolean; error?: string }>;
 }
