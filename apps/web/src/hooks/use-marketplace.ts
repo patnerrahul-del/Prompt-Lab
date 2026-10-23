@@ -490,7 +490,10 @@ export function useMarketplace() {
 
   // Admin / Creator: Post new prompt to website
   const addMarketplacePrompt = async (
-    promptData: Partial<Prompt> & { full_prompt_text?: string },
+    promptData: Partial<Omit<Prompt, 'media'>> & {
+      full_prompt_text?: string;
+      media?: (Partial<PromptMedia> & { url: string; media_type?: 'IMAGE' | 'VIDEO' | 'image' | 'video' })[];
+    },
     fullPromptText?: string,
     mediaList?: { media_type: 'IMAGE' | 'VIDEO' | 'image' | 'video'; url: string; thumbnail_url?: string; is_cover?: boolean }[]
   ) => {

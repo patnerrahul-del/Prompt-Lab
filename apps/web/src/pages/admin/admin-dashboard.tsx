@@ -344,10 +344,14 @@ export function AdminDashboard() {
         },
         media: [
           {
+            id: 'm_' + Math.random().toString(36).substring(2, 8),
+            prompt_id: '',
             media_type: isVideo ? 'VIDEO' : 'IMAGE',
             url: isVideo ? videoUrl : coverImageUrl,
             thumbnail_url: coverImageUrl,
+            display_order: 0,
             is_cover: true,
+            created_at: new Date().toISOString(),
           },
         ],
       });
