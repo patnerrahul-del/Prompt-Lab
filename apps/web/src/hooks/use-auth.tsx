@@ -81,6 +81,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isSupabaseConfigured) {
       // Offline / Local Demo mode initialization
+      setUser({
+        id: DEMO_LOCAL_PROFILE.id,
+        email: DEMO_LOCAL_PROFILE.email,
+        user_metadata: { full_name: DEMO_LOCAL_PROFILE.full_name },
+        app_metadata: {},
+        aud: 'authenticated',
+        created_at: DEMO_LOCAL_PROFILE.created_at,
+      } as User);
       setProfile(DEMO_LOCAL_PROFILE);
       setIsLoading(false);
       return;

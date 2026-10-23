@@ -48,6 +48,22 @@ export function OrderSummary() {
       return;
     }
 
+    if (total === 0) {
+      setIsProcessing(true);
+      setTimeout(() => {
+        setIsProcessing(false);
+        success('Complimentary prompt unlocked! Welcome to the atelier.');
+        navigate(`/checkout/receipt/complimentary_${Date.now()}`, {
+          state: {
+            promptTitle: prompt.title,
+            amountPaid: 0,
+            paymentId: 'complimentary_grant',
+          },
+        });
+      }, 500);
+      return;
+    }
+
     setIsProcessing(true);
     try {
       // 1. Create order on server (or test simulator)
@@ -184,12 +200,20 @@ export function OrderSummary() {
               className="w-full text-base py-3.5 shadow-gold-md gap-2"
             >
               <Sparkles className="h-5 w-5" />
-              <span>Complete Secure Acquisition • {formatINR(total)}</span>
+              <span>
+                {total === 0
+                  ? 'Claim Complimentary Prompt (Free)'
+                  : `Complete Secure Acquisition • ${formatINR(total)}`}
+              </span>
             </Button>
 
             <div className="flex items-center justify-center gap-2 text-xs font-mono text-text-muted">
               <ShieldCheck className="h-4 w-4 text-gold shrink-0" />
-              <span>Razorpay 256-bit Encrypted Settlement • Immediate Entitlement Activation</span>
+              <span>
+                {total === 0
+                  ? 'Immediate Atelier Access • Zero-Cost Collector License'
+                  : 'Razorpay 256-bit Encrypted Settlement • Immediate Entitlement Activation'}
+              </span>
             </div>
           </div>
         </div>

@@ -17,6 +17,7 @@ export function Navbar() {
     { label: 'Image Prompts', path: '/browse?category=IMAGE' },
     { label: 'Video Prompts', path: '/browse?category=VIDEO' },
     { label: 'Vault', path: '/vault', requiresAuth: true },
+    ...(isAdmin ? [{ label: 'Admin Studio', path: '/admin' }] : []),
   ];
 
   return (
@@ -88,8 +89,21 @@ export function Navbar() {
               </kbd>
             </button>
 
+            {/* Admin Studio Quick Action */}
+            {isAdmin && (
+              <Button
+                variant="gold"
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="hidden md:flex items-center gap-1.5 shadow-gold-sm text-xs font-semibold"
+              >
+                <Shield className="h-3.5 w-3.5" />
+                <span>Admin Studio</span>
+              </Button>
+            )}
+
             {/* Create Prompt Button (Vault Quick Action) */}
-            {isUser && (
+            {isUser && !isAdmin && (
               <Button
                 variant="outline"
                 size="sm"
@@ -232,10 +246,17 @@ export function Navbar() {
           <Search className="h-5 w-5" />
           <span>Explore</span>
         </Link>
-        <Link to="/vault" className="flex flex-col items-center text-xs text-text-muted hover:text-gold gap-1">
-          <Vault className="h-5 w-5" />
-          <span>Vault</span>
-        </Link>
+        {isAdmin ? (
+          <Link to="/admin" className="flex flex-col items-center text-xs text-gold-light hover:text-gold gap-1 font-semibold">
+            <Shield className="h-5 w-5 text-gold" />
+            <span>Admin</span>
+          </Link>
+        ) : (
+          <Link to="/vault" className="flex flex-col items-center text-xs text-text-muted hover:text-gold gap-1">
+            <Vault className="h-5 w-5" />
+            <span>Vault</span>
+          </Link>
+        )}
         {isUser ? (
           <Link to="/vault?tab=account" className="flex flex-col items-center text-xs text-text-muted hover:text-gold gap-1">
             <User className="h-5 w-5" />

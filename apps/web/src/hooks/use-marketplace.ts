@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
-import type { Prompt, Bundle, Category, AIModel, PromptCategoryType } from '@/types/database.types';
+import type { Prompt, Bundle, Category, AIModel, PromptCategoryType, PromptMedia, Order } from '@/types/database.types';
 
 // Luxury sample fallback dataset for instant zero-latency loading and offline resilience
 const DEMO_PROMPTS: Prompt[] = [
@@ -32,8 +32,8 @@ const DEMO_PROMPTS: Prompt[] = [
     copies_count: 124,
     sales_count: 42,
     views_count: 890,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+    updated_at: new Date(Date.now() - 86400000 * 5).toISOString(),
     category: {
       id: 'c0000000-0000-0000-0000-000000000002',
       name: 'Luxury Product & Horology',
@@ -94,8 +94,8 @@ const DEMO_PROMPTS: Prompt[] = [
     copies_count: 210,
     sales_count: 78,
     views_count: 1420,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 86400000 * 4).toISOString(),
+    updated_at: new Date(Date.now() - 86400000 * 4).toISOString(),
     category: {
       id: 'c0000000-0000-0000-0000-000000000007',
       name: 'Commercial & Luxury Ads',
@@ -155,8 +155,8 @@ const DEMO_PROMPTS: Prompt[] = [
     copies_count: 90,
     sales_count: 26,
     views_count: 670,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
+    updated_at: new Date(Date.now() - 86400000 * 3).toISOString(),
     category: {
       id: 'c0000000-0000-0000-0000-000000000003',
       name: 'Architectural Modernism',
@@ -216,8 +216,8 @@ const DEMO_PROMPTS: Prompt[] = [
     copies_count: 530,
     sales_count: 140,
     views_count: 2200,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    updated_at: new Date(Date.now() - 86400000 * 2).toISOString(),
     category: {
       id: 'c0000000-0000-0000-0000-000000000004',
       name: 'Neo-Noir & Cyberpunk',
@@ -276,8 +276,8 @@ const DEMO_PROMPTS: Prompt[] = [
     copies_count: 85,
     sales_count: 32,
     views_count: 790,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
+    updated_at: new Date(Date.now() - 86400000 * 1).toISOString(),
     category: {
       id: 'c0000000-0000-0000-0000-000000000008',
       name: 'Cinematic Drone & Landscape',
@@ -312,6 +312,101 @@ const DEMO_PROMPTS: Prompt[] = [
       },
     ],
   },
+  {
+    id: 'p0000000-0000-0000-0000-000000000011',
+    user_id: '00000000-0000-0000-0000-000000000001',
+    category_id: 'c0000000-0000-0000-0000-000000000011',
+    model_id: 'm0000000-0000-0000-0000-000000000006',
+    title: 'Kintsugi In Motion: Viscous Gold Macro Dynamics',
+    slug: 'kintsugi-in-motion-viscous-gold-macro-dynamics',
+    short_description: 'Microscopic fluid dynamics of 24k liquid gold sealing fractures in a black porcelain vase.',
+    teaser: 'Macro lens capturing molten liquid gold creeping through porcelain fissures, glowing with interior heat...',
+    negative_prompt: 'low frame rate, blurry',
+    settings: { aspect_ratio: '16:9', duration: '5s', macro_magnification: '5x' },
+    variables: [
+      { name: 'ceramic_texture', label: 'Ceramic Style', default_value: 'matte black textured stoneware' },
+    ],
+    difficulty: 'intermediate',
+    license_type: 'commercial',
+    price_inr: 0, // Free video prompt!
+    compare_at_price_inr: null,
+    status: 'published',
+    visibility: 'public',
+    is_featured: false,
+    average_rating: 4.94,
+    reviews_count: 28,
+    copies_count: 310,
+    sales_count: 89,
+    views_count: 1100,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    category: {
+      id: 'c0000000-0000-0000-0000-000000000011',
+      name: 'Microscopic Fluid Simulation',
+      slug: 'microscopic-fluid-sim',
+      type: 'VIDEO',
+      description: null,
+      icon: 'Droplets',
+      sort_order: 11,
+      created_at: new Date().toISOString(),
+    },
+    model: {
+      id: 'm0000000-0000-0000-0000-000000000006',
+      name: 'Kling AI 1.5',
+      slug: 'kling-ai',
+      category: 'VIDEO',
+      copy_template: null,
+      is_active: true,
+      sort_order: 6,
+      created_at: new Date().toISOString(),
+    },
+    media: [
+      {
+        id: 'm11',
+        prompt_id: 'p0000000-0000-0000-0000-000000000011',
+        media_type: 'VIDEO',
+        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        thumbnail_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=85',
+        duration_seconds: 5.0,
+        display_order: 0,
+        is_cover: true,
+        created_at: new Date().toISOString(),
+      },
+    ],
+  },
+];
+
+const DEMO_ORDERS: Order[] = [
+  {
+    id: 'ord_101',
+    user_id: 'u1',
+    coupon_id: 'd1',
+    razorpay_order_id: 'order_RZP902812',
+    razorpay_payment_id: 'pay_RZP88291039',
+    subtotal_inr: 799,
+    discount_inr: 100,
+    total_inr: 699,
+    currency: 'INR',
+    status: 'paid',
+    metadata: { customer_email: 'arjun.mehta@studio.in', prompt_title: 'Royal Tourbillon: Haute Horlogerie Noir' },
+    created_at: new Date(Date.now() - 3600000 * 3).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 3).toISOString(),
+  },
+  {
+    id: 'ord_102',
+    user_id: 'u2',
+    coupon_id: null,
+    razorpay_order_id: 'order_RZP773819',
+    razorpay_payment_id: 'pay_RZP44910284',
+    subtotal_inr: 999,
+    discount_inr: 0,
+    total_inr: 999,
+    currency: 'INR',
+    status: 'paid',
+    metadata: { customer_email: 'priya.sharma@vogue.co', prompt_title: 'Aura Nectar: 4K Slow-Motion Perfume Commercial' },
+    created_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+    updated_at: new Date(Date.now() - 3600000 * 8).toISOString(),
+  },
 ];
 
 export function useMarketplace() {
@@ -320,6 +415,7 @@ export function useMarketplace() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [models, setModels] = useState<AIModel[]>([]);
   const [bundles, setBundles] = useState<Bundle[]>([]);
+  const [orders, setOrders] = useState<Order[]>(DEMO_ORDERS);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [favorites, setFavorites] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('aurum_favorites');
@@ -339,7 +435,13 @@ export function useMarketplace() {
     setIsLoading(true);
 
     if (!isSupabaseConfigured) {
-      setPrompts(DEMO_PROMPTS);
+      const stored = localStorage.getItem('aurum_marketplace_prompts');
+      if (stored) {
+        setPrompts(JSON.parse(stored));
+      } else {
+        setPrompts(DEMO_PROMPTS);
+        localStorage.setItem('aurum_marketplace_prompts', JSON.stringify(DEMO_PROMPTS));
+      }
       setIsLoading(false);
       return;
     }
@@ -385,6 +487,151 @@ export function useMarketplace() {
   useEffect(() => {
     loadMarketplace();
   }, [loadMarketplace]);
+
+  // Admin / Creator: Post new prompt to website
+  const addMarketplacePrompt = async (
+    promptData: Partial<Prompt>,
+    fullPromptText: string,
+    mediaList: { media_type: 'IMAGE' | 'VIDEO'; url: string; thumbnail_url?: string; is_cover?: boolean }[]
+  ) => {
+    const id = 'p_' + Math.random().toString(36).substring(2, 9);
+    const slug = promptData.slug || promptData.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'prompt-' + id;
+    const teaser = promptData.teaser || fullPromptText.slice(0, Math.floor(fullPromptText.length * 0.25)) + '...';
+
+    const media: PromptMedia[] = mediaList.map((m, idx) => ({
+      id: `m_${id}_${idx}`,
+      prompt_id: id,
+      media_type: m.media_type,
+      url: m.url,
+      thumbnail_url: m.thumbnail_url || m.url,
+      display_order: idx,
+      is_cover: Boolean(m.is_cover || idx === 0),
+      created_at: new Date().toISOString(),
+    }));
+
+    const completePrompt: Prompt = {
+      id,
+      user_id: promptData.user_id || '00000000-0000-0000-0000-000000000001',
+      category_id: promptData.category_id || null,
+      model_id: promptData.model_id || null,
+      title: promptData.title || 'Untitled Haute Prompt',
+      slug,
+      short_description: promptData.short_description || null,
+      teaser,
+      negative_prompt: promptData.negative_prompt || null,
+      settings: promptData.settings || {},
+      variables: promptData.variables || [],
+      difficulty: promptData.difficulty || 'intermediate',
+      license_type: promptData.license_type || 'commercial',
+      price_inr: Number(promptData.price_inr || 0),
+      compare_at_price_inr: promptData.compare_at_price_inr || null,
+      status: promptData.status || 'published',
+      visibility: promptData.visibility || 'public',
+      is_featured: Boolean(promptData.is_featured),
+      average_rating: 5.0,
+      reviews_count: 0,
+      copies_count: 0,
+      sales_count: 0,
+      views_count: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      category: promptData.category || {
+        id: 'cat_custom',
+        name: promptData.category?.type === 'VIDEO' ? 'Generative Video' : 'Haute Image',
+        slug: promptData.category?.type === 'VIDEO' ? 'generative-video' : 'haute-image',
+        type: promptData.category?.type || 'IMAGE',
+        description: null,
+        icon: promptData.category?.type === 'VIDEO' ? 'Film' : 'Image',
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+      },
+      model: promptData.model || {
+        id: 'mod_custom',
+        name: 'Target AI Model',
+        slug: 'target-model',
+        category: promptData.category?.type || 'IMAGE',
+        copy_template: null,
+        is_active: true,
+        sort_order: 1,
+        created_at: new Date().toISOString(),
+      },
+      media,
+    };
+
+    // Save full locked content in storage/backend
+    localStorage.setItem(`aurum_content_${id}`, fullPromptText);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('prompts').insert({
+          id,
+          user_id: completePrompt.user_id,
+          title: completePrompt.title,
+          slug: completePrompt.slug,
+          short_description: completePrompt.short_description,
+          teaser: completePrompt.teaser,
+          negative_prompt: completePrompt.negative_prompt,
+          settings: completePrompt.settings,
+          variables: completePrompt.variables,
+          difficulty: completePrompt.difficulty,
+          license_type: completePrompt.license_type,
+          price_inr: completePrompt.price_inr,
+          compare_at_price_inr: completePrompt.compare_at_price_inr,
+          status: completePrompt.status,
+          visibility: completePrompt.visibility,
+          is_featured: completePrompt.is_featured,
+        });
+
+        await supabase.from('prompt_contents').insert({
+          prompt_id: id,
+          full_prompt_text: fullPromptText,
+        });
+
+        for (const item of media) {
+          await supabase.from('prompt_media').insert({
+            prompt_id: id,
+            media_type: item.media_type,
+            url: item.url,
+            thumbnail_url: item.thumbnail_url,
+            display_order: item.display_order,
+            is_cover: item.is_cover,
+          });
+        }
+      } catch (e) {
+        console.error('Error syncing prompt to Supabase:', e);
+      }
+    }
+
+    const updated = [completePrompt, ...prompts];
+    setPrompts(updated);
+    localStorage.setItem('aurum_marketplace_prompts', JSON.stringify(updated));
+    return completePrompt;
+  };
+
+  // Delete prompt from marketplace
+  const deleteMarketplacePrompt = async (promptId: string) => {
+    if (isSupabaseConfigured) {
+      await supabase.from('prompts').delete().eq('id', promptId).catch(() => {});
+    }
+    const updated = prompts.filter((p) => p.id !== promptId);
+    setPrompts(updated);
+    localStorage.setItem('aurum_marketplace_prompts', JSON.stringify(updated));
+  };
+
+  // Toggle featured status
+  const toggleFeatured = async (promptId: string) => {
+    const target = prompts.find((p) => p.id === promptId);
+    if (!target) return;
+    const newFeatured = !target.is_featured;
+
+    if (isSupabaseConfigured) {
+      await supabase.from('prompts').update({ is_featured: newFeatured }).eq('id', promptId).catch(() => {});
+    }
+
+    const updated = prompts.map((p) => (p.id === promptId ? { ...p, is_featured: newFeatured } : p));
+    setPrompts(updated);
+    localStorage.setItem('aurum_marketplace_prompts', JSON.stringify(updated));
+  };
 
   // Toggle favorite bookmark
   const toggleFavorite = (promptId: string) => {
@@ -442,9 +689,13 @@ export function useMarketplace() {
     categories,
     models,
     bundles,
+    orders,
     isLoading,
     favorites,
     toggleFavorite,
+    addMarketplacePrompt,
+    deleteMarketplacePrompt,
+    toggleFeatured,
     selectedModality,
     setSelectedModality,
     selectedCategorySlug,
