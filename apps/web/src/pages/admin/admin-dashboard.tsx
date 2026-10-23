@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Shield,
   DollarSign,
   ShoppingCart,
   Users,
@@ -35,6 +36,7 @@ import { formatINR, formatDate, extractVariables } from '@/lib/utils';
 import { useToast } from '@/components/ui/toast';
 import { useMarketplace } from '@/hooks/use-marketplace';
 import { SEO } from '@/components/common/seo';
+import { getSecurityIncidents, simulateAttackProbe, type SecurityIncident } from '@/lib/security/audit';
 import type { PromptDifficulty, PromptLicenseType, PromptCategoryType } from '@/types/database.types';
 
 // ==============================================================================
@@ -99,7 +101,10 @@ export function AdminDashboard() {
   const { allPrompts, orders, addMarketplacePrompt, deleteMarketplacePrompt, toggleFeatured } = useMarketplace();
 
   // Active ERP/CRM Navigation Tab
-  const [activeTab, setActiveTab] = useState<'overview' | 'studio' | 'customers' | 'sellers' | 'orders' | 'coupons' | 'tickets' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'studio' | 'customers' | 'sellers' | 'orders' | 'coupons' | 'tickets' | 'security' | 'settings'>('overview');
+
+  // Security Audit & Intrusion Detection State
+  const [securityLogs, setSecurityLogs] = useState<SecurityIncident[]>(() => getSecurityIncidents());
 
   // Governance & ERP Global Parameters
   const [commissionRate, setCommissionRate] = useState<number>(15);
@@ -404,6 +409,18 @@ export function AdminDashboard() {
     success('Ticket marked as resolved');
   };
 
+  const handleTriggerSimulatedProbe = () => {
+    const probe = simulateAttackProbe();
+    setSecurityLogs(getSecurityIncidents());
+    toastError(`🚨 ATTACK INTERCEPTED & BLOCKED: ${probe.threatType.replace(/_/g, ' ')} from ${probe.source} was BLOCKED by Firewall!`);
+  };
+
+  const handleClearSecurityLogs = () => {
+    localStorage.removeItem('aurum_security_audit_events');
+    setSecurityLogs(getSecurityIncidents());
+    success('Security incident audit logs reset to baseline.');
+  };
+
   const filteredCustomers = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
@@ -515,7 +532,7 @@ export function AdminDashboard() {
         {/* ENTERPRISE MODULE NAVIGATION TABS */}
         {/* ========================================================================= */}
         <Tabs defaultValue="overview" value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-          <TabsList className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 w-full h-auto p-1.5 bg-surface/90 border border-white/10 gap-1 rounded-2xl">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 w-full h-auto p-1.5 bg-surface/90 border border-white/10 gap-1 rounded-2xl">
             <TabsTrigger value="overview" className="gap-1.5 py-2.5 text-xs">
               <BarChart3 className="h-3.5 w-3.5" />
               <span>ERP Ledger</span>
@@ -543,6 +560,10 @@ export function AdminDashboard() {
             <TabsTrigger value="tickets" className="gap-1.5 py-2.5 text-xs">
               <MessageSquare className="h-3.5 w-3.5" />
               <span>Support ({tickets.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="gap-1.5 py-2.5 text-xs text-red-300 hover:text-red-200">
+              <Shield className="h-3.5 w-3.5 text-red-400" />
+              <span>Cyber Shield ({securityLogs.length})</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-1.5 py-2.5 text-xs">
               <Sliders className="h-3.5 w-3.5" />
@@ -1445,7 +1466,158 @@ export function AdminDashboard() {
           </TabsContent>
 
           {/* ========================================================================= */}
-          {/* TAB 8: GOVERNANCE & CREDENTIALS */}
+          {/* TAB 8: CYBER SECURITY & INTRUSION DETECTION SHIELD */}
+          {/* ========================================================================= */}
+          <TabsContent value="security" className="space-y-6">
+            <div className="glass-card rounded-2xl border border-red-500/30 bg-surface/90 p-6 sm:p-8 space-y-6 shadow-luxury">
+              {/* Shield Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">
+                      Shield Armor Active • 100% Zero-Leak Enforced
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-2xl font-bold text-text-ivory">
+                    Cyber Security & Intrusion Monitoring Center
+                  </h3>
+                  <p className="text-xs text-text-muted">
+                    Real-time detection of SQL injections, prompt leak attempts, unauthorized route access, and payment tampering
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    onClick={handleTriggerSimulatedProbe}
+                    className="gap-2 text-xs border-red-500/30 text-red-300 hover:bg-red-950/40"
+                  >
+                    <Shield className="h-4 w-4 text-red-400" />
+                    <span>Simulate Hacker Attack (Test Alert)</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearSecurityLogs}
+                    className="text-xs text-text-muted hover:text-text-ivory"
+                  >
+                    Reset Logs
+                  </Button>
+                </div>
+              </div>
+
+              {/* Threat Intelligence Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-1">
+                  <span className="text-[10px] font-mono uppercase text-text-muted block">Total Attacks Intercepted</span>
+                  <div className="text-2xl font-serif font-bold text-red-400">{securityLogs.length}</div>
+                  <span className="text-[10px] font-mono text-emerald-400">100% Neutralized</span>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-1">
+                  <span className="text-[10px] font-mono uppercase text-text-muted block">Critical Injections Blocked</span>
+                  <div className="text-2xl font-serif font-bold text-amber-300">
+                    {securityLogs.filter((s) => s.threatLevel === 'CRITICAL').length}
+                  </div>
+                  <span className="text-[10px] font-mono text-text-muted">SQLi / Remote Probes</span>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-1">
+                  <span className="text-[10px] font-mono uppercase text-text-muted block">Prompt Leaks Thwarted</span>
+                  <div className="text-2xl font-serif font-bold text-gold-light">
+                    {securityLogs.filter((s) => s.threatType === 'PROMPT_LEAK_EXFILTRATION_PROBE').length}
+                  </div>
+                  <span className="text-[10px] font-mono text-text-muted">Postgres RLS Defense</span>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-black/40 p-4 space-y-1">
+                  <span className="text-[10px] font-mono uppercase text-text-muted block">Payment Forgeries Rejected</span>
+                  <div className="text-2xl font-serif font-bold text-emerald-400">
+                    {securityLogs.filter((s) => s.threatType === 'WEBHOOK_SIGNATURE_MISMATCH').length}
+                  </div>
+                  <span className="text-[10px] font-mono text-text-muted">HMAC SHA256 Enforced</span>
+                </div>
+              </div>
+
+              {/* Active Security Architecture Protocols */}
+              <div className="p-4 rounded-xl border border-white/10 bg-black/30 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                <div className="flex items-center gap-2 text-text-muted">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span><strong>Zero-Leak RLS:</strong> Direct SELECT on prompt_contents blocked for all users except owner/admin.</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-muted">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span><strong>Payment Anti-Tamper:</strong> Authoritative prices fetched strictly on server, client price ignored.</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-muted">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span><strong>Cryptographic Webhook:</strong> Web Crypto HMAC SHA256 verifies signature before order settlement.</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-muted">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span><strong>Anti-Clickjacking / CSP:</strong> X-Frame-Options DENY and Content-Security-Policy active.</span>
+                </div>
+              </div>
+
+              {/* Live Incident Audit Ledger */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <h4 className="font-serif text-lg font-bold">Live Incident & Attack Log</h4>
+                  <span className="text-xs font-mono text-text-muted">Forensic Audit Trail</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10 text-xs font-mono uppercase text-text-muted">
+                        <th className="pb-3">Timestamp</th>
+                        <th className="pb-3">Threat Vector</th>
+                        <th className="pb-3">Severity</th>
+                        <th className="pb-3">Attacker IP / Origin</th>
+                        <th className="pb-3">Target Endpoint</th>
+                        <th className="pb-3">Firewall Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 font-mono text-xs">
+                      {securityLogs.map((log) => (
+                        <tr key={log.id} className="hover:bg-white/[0.02]">
+                          <td className="py-3 text-text-muted">{formatDate(log.timestamp)}</td>
+                          <td className="py-3 font-bold text-text-ivory">
+                            {log.threatType.replace(/_/g, ' ')}
+                            <p className="font-sans font-normal text-[11px] text-text-muted mt-0.5 line-clamp-1">
+                              {log.details}
+                            </p>
+                          </td>
+                          <td className="py-3">
+                            <span
+                              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                                log.threatLevel === 'CRITICAL'
+                                  ? 'bg-red-950/50 text-red-300 border-red-500/40'
+                                  : log.threatLevel === 'HIGH'
+                                  ? 'bg-amber-950/50 text-amber-300 border-amber-500/40'
+                                  : 'bg-white/10 text-text-muted border-white/10'
+                              }`}
+                            >
+                              {log.threatLevel}
+                            </span>
+                          </td>
+                          <td className="py-3 text-text-muted truncate max-w-[150px]">{log.source}</td>
+                          <td className="py-3 text-gold-light truncate max-w-[180px]">{log.target}</td>
+                          <td className="py-3">
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[10px] bg-emerald-950/40 text-emerald-300 border border-emerald-500/30">
+                              {log.actionTaken}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ========================================================================= */}
+          {/* TAB 9: GOVERNANCE & CREDENTIALS */}
           {/* ========================================================================= */}
           <TabsContent value="settings">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

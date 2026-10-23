@@ -29,8 +29,11 @@ serve(async (req) => {
 
     const rawBody = await req.text();
 
-    // Verify cryptographic signature if secret is configured
-    if (webhookSecret && signature) {
+    // Cryptographic signature enforcement
+    if (webhookSecret) {
+      if (!signature) {
+        return new Response(JSON.stringify({ error: 'Missing x-razorpay-signature header' }), { status: 401 });
+      }
       const isValid = await verifyHmacSha256(rawBody, signature, webhookSecret);
       if (!isValid) {
         return new Response(JSON.stringify({ error: 'Invalid HMAC signature' }), { status: 401 });
