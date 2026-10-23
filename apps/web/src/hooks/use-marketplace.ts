@@ -563,7 +563,7 @@ export function useMarketplace() {
     };
 
     // Save full locked content in storage/backend
-    localStorage.setItem(`aurum_content_${id}`, fullPromptText);
+    localStorage.setItem(`aurum_content_${id}`, text);
 
     if (isSupabaseConfigured) {
       try {

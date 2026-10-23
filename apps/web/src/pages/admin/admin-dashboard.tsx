@@ -344,7 +344,7 @@ export function AdminDashboard() {
         },
         media: [
           {
-            media_type: isVideo ? 'video' : 'image',
+            media_type: isVideo ? 'VIDEO' : 'IMAGE',
             url: isVideo ? videoUrl : coverImageUrl,
             thumbnail_url: coverImageUrl,
             is_cover: true,
