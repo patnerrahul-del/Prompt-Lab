@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Copy, Check, Sliders, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { extractVariables, interpolatePrompt } from '@/lib/utils';
@@ -14,7 +14,7 @@ export interface PromptCustomizerProps {
 export function PromptCustomizer({
   prompt,
   rawPromptText,
-  model,
+  model: _model,
 }: PromptCustomizerProps) {
   const { success } = useToast();
   const [copiedFormat, setCopiedFormat] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export function PromptCustomizer({
 
           {detectedVarNames.length === 0 ? (
             <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 text-xs text-text-muted italic">
-              This prompt is pre-calibrated without explicit {{variables}}. You can copy it directly
+              This prompt is pre-calibrated without explicit {'{{variables}}'}. You can copy it directly
               below.
             </div>
           ) : (

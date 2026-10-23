@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -15,7 +15,7 @@ export function AuthModal() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
     setIsLoading(true);
@@ -29,7 +29,7 @@ export function AuthModal() {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
     setIsLoading(true);
@@ -43,7 +43,7 @@ export function AuthModal() {
     }
   };
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleMagicLink = async (e: FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setIsLoading(true);

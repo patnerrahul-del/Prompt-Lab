@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { ShieldCheck, MessageSquare } from 'lucide-react';
 import { RatingStars } from '@/components/ui/rating-stars';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,7 @@ export function ReviewList({
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
     setIsSubmitting(true);

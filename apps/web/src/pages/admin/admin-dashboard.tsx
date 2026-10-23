@@ -165,7 +165,7 @@ export function AdminDashboard() {
                     fontFamily: 'monospace',
                     fontSize: '12px',
                   }}
-                  formatter={(value: number) => [formatINR(value), 'Gross Volume']}
+                  formatter={(value: any) => [formatINR(Number(value) || 0), 'Gross Volume']}
                 />
                 <Area
                   type="monotone"

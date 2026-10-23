@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/hooks/use-auth';
-import type { Prompt, Collection, PromptVersion, PromptCategoryType } from '@/types/database.types';
+import type { Prompt, Collection, PromptCategoryType } from '@/types/database.types';
 
 export function useVault() {
   const { user, profile } = useAuth();

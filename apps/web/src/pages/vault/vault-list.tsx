@@ -10,7 +10,7 @@ import { useVault } from '@/hooks/use-vault';
 import { useToast } from '@/components/ui/toast';
 import { SEO } from '@/components/common/seo';
 import { cn } from '@/lib/utils';
-import type { Prompt } from '@/types/database.types';
+import type { Prompt, PromptCategoryType } from '@/types/database.types';
 
 export function VaultList() {
   const navigate = useNavigate();

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, ArrowRight, ShieldCheck, Film, Image, Vault, Compass } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldCheck, Film, Image, Vault } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PromptCard } from '@/components/prompt/prompt-card';
 import { SEO } from '@/components/common/seo';

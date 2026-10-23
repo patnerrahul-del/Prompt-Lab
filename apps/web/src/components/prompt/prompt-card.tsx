@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Bookmark, Sparkles, Copy, Check } from 'lucide-react';
 import { VideoHoverPreview } from './video-hover-preview';
@@ -27,7 +27,7 @@ export function PromptCard({
   const coverImageUrl = coverMedia?.thumbnail_url || coverMedia?.url || 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80';
   const videoPreviewUrl = isVideo && coverMedia?.media_type === 'VIDEO' ? coverMedia.url : null;
 
-  const handleCopyTeaser = (e: React.MouseEvent) => {
+  const handleCopyTeaser = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (prompt.teaser) {

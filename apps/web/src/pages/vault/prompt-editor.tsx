@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, History, Sparkles, Eye, Shield, Sliders } from 'lucide-react';
+import { ArrowLeft, Save, History, Sparkles, Shield, Sliders } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer } from '@/components/ui/drawer';
 import { extractVariables, formatINR } from '@/lib/utils';
@@ -65,7 +65,7 @@ export function PromptEditor() {
     }
   }, [isEditing, id, allPrompts]);
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !fullPromptText.trim()) {
       toastError('Prompt title and content cannot be empty');

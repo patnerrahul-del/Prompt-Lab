@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, DollarSign, Clock, ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ export function SellerDashboard() {
 
   const availableBalance = profile?.seller_balance_inr || 54200;
 
-  const handleRequestPayout = (e: React.FormEvent) => {
+  const handleRequestPayout = (e: FormEvent) => {
     e.preventDefault();
     setIsSubmittingPayout(true);
     setTimeout(() => {
