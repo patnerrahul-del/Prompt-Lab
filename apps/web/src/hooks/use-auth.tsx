@@ -15,6 +15,7 @@ interface AuthContextType {
   isAuthModalOpen: boolean;
   openAuthModal: () => void;
   closeAuthModal: () => void;
+  setRole: (role: UserRole) => void;
   signInWithEmail: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUpWithEmail: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signInWithMagicLink: (email: string) => Promise<{ error: Error | null }>;
@@ -46,6 +47,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [simulatedRole, setSimulatedRole] = useState<UserRole | null>(() => {
+    return (localStorage.getItem('aurum_simulated_role') as UserRole) || null;
+  });
+
+  const setRole = (newRole: UserRole) => {
+    setSimulatedRole(newRole);
+    localStorage.setItem('aurum_simulated_role', newRole);
+    if (profile) {
+      setProfile({ ...profile, role: newRole });
+    }
+  };
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -161,14 +173,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (!isSupabaseConfigured) {
-      setUser({ id: DEMO_LOCAL_PROFILE.id, email: 'google.demo@aurumprompts.com' } as User);
-      setProfile(DEMO_LOCAL_PROFILE);
+      const googleMockUser = {
+        id: DEMO_LOCAL_PROFILE.id,
+        email: 'collector.google@aurumprompts.com',
+        user_metadata: {
+          full_name: 'Rahul Chandrabanshi (Google)',
+          avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+        },
+        app_metadata: { provider: 'google' },
+      } as unknown as User;
+      setUser(googleMockUser);
+      setProfile({
+        ...DEMO_LOCAL_PROFILE,
+        full_name: 'Rahul Chandrabanshi (Google)',
+        email: 'collector.google@aurumprompts.com',
+        avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+      });
       setIsAuthModalOpen(false);
       return { error: null };
     }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: {
+        redirectTo: `${window.location.origin}/user`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
     });
     return { error: error ? new Error(error.message) : null };
   };
@@ -180,9 +212,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    localStorage.removeItem('aurum_simulated_role');
+    setSimulatedRole(null);
   };
 
-  const role: UserRole = profile?.role ?? 'visitor';
+  // Determine role: simulated override > admin emails check > profile role > default
+  const configuredAdminEmails = (import.meta.env.VITE_ADMIN_EMAILS || 'concierge@aurumprompts.com')
+    .toLowerCase()
+    .split(',')
+    .map((e: string) => e.trim());
+
+  const isEmailAdmin = Boolean(user?.email && configuredAdminEmails.includes(user.email.toLowerCase()));
+  const computedRole: UserRole = isEmailAdmin ? 'admin' : (profile?.role ?? 'visitor');
+  const role: UserRole = simulatedRole || computedRole;
   const isAdmin = role === 'admin';
   const isSeller = role === 'seller' || isAdmin;
   const isUser = Boolean(user) || Boolean(profile);
@@ -199,6 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthModalOpen,
     openAuthModal: () => setIsAuthModalOpen(true),
     closeAuthModal: () => setIsAuthModalOpen(false),
+    setRole,
     signInWithEmail,
     signUpWithEmail,
     signInWithMagicLink,

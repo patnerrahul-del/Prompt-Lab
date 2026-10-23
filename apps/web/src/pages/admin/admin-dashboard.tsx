@@ -997,6 +997,44 @@ export function AdminDashboard() {
                 </Button>
               </div>
             </div>
+
+            {/* Google OAuth & Security Setup */}
+            <div className="glass-card rounded-2xl border border-gold/30 bg-surface/90 p-6 sm:p-8 space-y-5 max-w-2xl mt-6 shadow-gold-sm">
+              <div className="flex items-center gap-2 pb-3 border-b border-white/10">
+                <div className="h-2 w-2 rounded-full bg-gold" />
+                <h3 className="font-serif text-xl font-bold text-text-ivory">
+                  Google OAuth & Authentication Credentials
+                </h3>
+              </div>
+
+              <p className="text-xs text-text-muted leading-relaxed">
+                Connect your Google Cloud OAuth Client ID & Client Secret in Supabase to enable seamless 1-click Google Sign-In for both Collectors and Platform Administrators.
+              </p>
+
+              <div className="space-y-3 font-mono text-xs">
+                <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-1.5">
+                  <span className="text-[10px] uppercase text-text-muted">1. Google Cloud Console Authorized Origin:</span>
+                  <div className="text-text-ivory font-bold">{typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173'}</div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-black/40 border border-gold/40 space-y-1.5">
+                  <span className="text-[10px] uppercase text-gold">2. Supabase OAuth Callback (Redirect URI):</span>
+                  <div className="text-gold font-bold break-all">
+                    {(import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co') + '/auth/v1/callback'}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-1.5">
+                  <span className="text-[10px] uppercase text-text-muted">3. Automatic Admin Email Whitelist:</span>
+                  <div className="text-emerald-400 font-bold">
+                    VITE_ADMIN_EMAILS=your.email@gmail.com,concierge@aurumprompts.com
+                  </div>
+                  <p className="text-[10px] text-text-muted font-sans">
+                    Any Google account matching this variable in <code>.env</code> is instantly granted Master Admin permissions upon login.
+                  </p>
+                </div>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

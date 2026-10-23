@@ -20,6 +20,7 @@ import { OrderSummary } from '@/pages/checkout/order-summary';
 import { OrderReceipt } from '@/pages/checkout/order-receipt';
 import { AdminDashboard } from '@/pages/admin/admin-dashboard';
 import { SellerDashboard } from '@/pages/seller/seller-dashboard';
+import { UserDashboard } from '@/pages/user/user-dashboard';
 import { Terms } from '@/pages/legal/terms';
 import { Privacy } from '@/pages/legal/privacy';
 import { Refund } from '@/pages/legal/refund';
@@ -81,6 +82,16 @@ function AppContent(): React.ReactElement {
             element={
               <ProtectedRoute>
                 <OrderReceipt />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* User Control Panel */}
+          <Route
+            path="/user"
+            element={
+              <ProtectedRoute>
+                <UserDashboard />
               </ProtectedRoute>
             }
           />

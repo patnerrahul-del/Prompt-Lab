@@ -145,6 +145,13 @@ export function Navbar() {
 
                     <div className="py-1">
                       <Link
+                        to="/user"
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gold-light hover:bg-gold/10 font-medium"
+                      >
+                        <User className="h-4 w-4 text-gold" />
+                        <span>User Control Panel</span>
+                      </Link>
+                      <Link
                         to="/vault"
                         className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-text-muted hover:text-text-ivory hover:bg-white/[0.05]"
                       >
@@ -258,7 +265,7 @@ export function Navbar() {
           </Link>
         )}
         {isUser ? (
-          <Link to="/vault?tab=account" className="flex flex-col items-center text-xs text-text-muted hover:text-gold gap-1">
+          <Link to="/user" className="flex flex-col items-center text-xs text-text-muted hover:text-gold gap-1">
             <User className="h-5 w-5" />
             <span>Profile</span>
           </Link>
